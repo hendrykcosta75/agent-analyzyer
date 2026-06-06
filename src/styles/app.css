@@ -497,6 +497,17 @@
   letter-spacing: 0.12em;
   color: var(--text-1);
 }
+.hud-action {
+  pointer-events: auto;
+  cursor: pointer;
+  color: var(--green);
+  border-color: var(--green-dim);
+  background: var(--green-glow);
+  transition: filter 0.15s ease;
+}
+.hud-action:hover {
+  filter: brightness(1.15);
+}
 
 .webgl-fallback-note {
   position: absolute;
@@ -980,7 +991,7 @@
   font-size: 9px;
   letter-spacing: 0.14em;
   color: var(--text-0);
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.95);
 }
 .node-label .nl-detail {
   font-family: var(--font-mono);
@@ -988,8 +999,237 @@
   letter-spacing: 0.18em;
   color: var(--text-2);
 }
+/* Tool/skill/mcp/memory labels read quieter than agent labels. */
+.node-label.tool {
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(4, 5, 10, 0.66);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(3px);
+}
+.node-label.tool .nl-name {
+  font-size: 8px;
+  color: var(--text-1);
+}
+.node-label.tool .nl-detail {
+  font-size: 6.5px;
+  letter-spacing: 0.2em;
+  color: var(--text-3);
+}
 .node-label.dim {
   opacity: 0.4;
+}
+
+/* ============================================================
+   Map view tabs + controls (over the canvas)
+   ============================================================ */
+
+.map-tabs {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(3, 3, 4, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 3;
+}
+.map-tab {
+  padding: 5px 11px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.map-tab:hover {
+  color: var(--text-0);
+}
+.map-tab.active {
+  color: var(--green);
+  background: var(--green-glow);
+}
+
+.map-controls {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  display: flex;
+  gap: 5px;
+  z-index: 3;
+}
+.map-ctrl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(3, 3, 4, 0.6);
+  backdrop-filter: blur(6px);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.map-ctrl:hover {
+  color: var(--text-0);
+  border-color: var(--line-strong);
+}
+.map-ctrl.active {
+  color: var(--green);
+  border-color: var(--green-dim);
+  background: var(--green-glow);
+}
+
+/* The HUD sits below the controls so they don't overlap. */
+.canvas-hud {
+  top: 50px;
+}
+
+/* ============================================================
+   Leader-line callouts (3D markers)
+   ============================================================ */
+
+.map-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  border-radius: 3px;
+  background: rgba(4, 5, 9, 0.72);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  user-select: none;
+  transform: translateY(-50%);
+  line-height: 1.25;
+}
+.map-callout.left {
+  transform: translate(-100%, -50%);
+  border-left: 1px solid var(--line);
+  border-right: 2px solid var(--line-strong);
+  text-align: right;
+  align-items: flex-end;
+}
+.map-callout.dim {
+  opacity: 0.35;
+}
+.map-callout .mc-name {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--text-0);
+}
+.map-callout .mc-sub {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-2);
+}
+.map-callout .mc-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-1);
+}
+.map-callout.left .mc-stat {
+  flex-direction: row-reverse;
+}
+.map-callout .mc-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.map-callout .mc-metric {
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+}
+
+/* Galaxy planet labels are centered by drei <Html center>, so the leader-line
+   translate offset must be cleared. They also need no left/right accent. */
+.map-callout.galaxy-label,
+.map-callout.office-label {
+  transform: none;
+  align-items: center;
+  text-align: center;
+  border-left: 1px solid var(--line);
+  background: rgba(4, 5, 9, 0.6);
+}
+.map-callout.galaxy-label .mc-stat,
+.map-callout.office-label .mc-stat {
+  flex-direction: row;
+}
+
+/* Office work-station tags */
+.map-callout.office-zone {
+  transform: none;
+  padding: 3px 7px;
+  border-left: 1px solid var(--line);
+  background: rgba(4, 5, 9, 0.5);
+}
+.map-callout.office-zone .mc-name {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+}
+
+/* Gateway core wall screen */
+.office-core-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(140, 255, 106, 0.6);
+}
+.office-core-label span:first-child {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--green);
+}
+.office-core-label .ocl-sub {
+  font-size: 7.5px;
+  letter-spacing: 0.26em;
+  color: rgba(140, 255, 106, 0.6);
+}
+
+/* Node-type key (shape glyphs) */
+.legend-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 2px 0;
+}
+.canvas-legend .legend-title {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  color: var(--text-3);
+  margin-bottom: 1px;
+}
+.canvas-legend .item .glyph {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  display: block;
+  color: var(--text-1);
 }
 
 .fallback-svg {
@@ -1008,6 +1248,23 @@
   font-size: 7px;
   letter-spacing: 0.14em;
   fill: var(--text-2);
+}
+.fallback-svg .fb-callout .fb-cn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  fill: var(--text-0);
+}
+.fallback-svg .fb-callout .fb-cs {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  fill: var(--text-2);
+}
+.fallback-svg .fb-callout .fb-ct {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.16em;
 }
 
 @media (max-width: 980px) {

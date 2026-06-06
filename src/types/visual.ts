@@ -26,6 +26,9 @@ export type NodeStatus =
   | "error"
   | "complete";
 
+/** Capability family for nodes attached to an agent. */
+export type NodeFlavor = "tool" | "skill" | "mcp" | "memory";
+
 export interface VisualNode {
   id: string;
   label: string;
@@ -33,11 +36,15 @@ export interface VisualNode {
   status: NodeStatus;
   /** Sub-label, e.g. tool family or agent role. */
   detail?: string;
+  /** For tool-family nodes: distinguishes tool / skill / mcp / memory. */
+  flavor?: NodeFlavor;
   x?: number;
   y?: number;
   z?: number;
   /** Graph parent: agents attach to the gateway, tools attach to an agent. */
   parentId?: string;
+  /** Index of the owning agent cluster (0-based), used for layout sectors. */
+  cluster?: number;
   metadata?: Record<string, unknown>;
   updatedAt: string;
 }

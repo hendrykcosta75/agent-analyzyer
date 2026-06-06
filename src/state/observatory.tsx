@@ -8,7 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { buildGraph } from "@/lib/graph";
+import { buildGraph, DEFAULT_CONFIG, type NetworkConfig } from "@/lib/graph";
+import type { AgentDef, ToolFlavor } from "@/data/agents";
 import {
   EVENT_TEMPLATES,
   SEED_AGENTS,
@@ -59,6 +60,8 @@ interface ObservatoryValue {
   setMode: (m: ConnectionMode) => void;
   paused: boolean;
   setPaused: (p: boolean) => void;
+  /** Append a sub-agent region to the live config (dynamic topology). */
+  addAgent: () => void;
   /** Imperative pulse bus for the graph; returns an unsubscribe fn. */
   onFire: (cb: (edgeIds: string[]) => void) => () => void;
 }
@@ -85,10 +88,44 @@ function computeLifecycle(agents: AgentSummary[]): LifecycleSlice[] {
 let counter = 0;
 const nextId = () => `ev-live-${Date.now()}-${counter++}`;
 
+const NEW_AGENT_ROLES = ["PLANNER", "AUDITOR", "ROUTER", "SUMMARIZER", "WATCHER"];
+const NEW_AGENT_STATUSES: NodeStatus[] = ["active", "thinking", "executing", "waiting"];
+const NEW_TOOL_FLAVORS: ToolFlavor[] = ["tool", "skill", "mcp", "memory"];
+let agentSeq = 50;
+
+function makeAgent(): AgentDef {
+  const n = agentSeq++;
+  const status = NEW_AGENT_STATUSES[n % NEW_AGENT_STATUSES.length];
+  const toolCount = 2 + (n % 2);
+  return {
+    id: `agent-${n}`,
+    label: `AGENT-${n}`,
+    role: NEW_AGENT_ROLES[n % NEW_AGENT_ROLES.length],
+    status,
+    tools: Array.from({ length: toolCount }, (_, j) => {
+      const flavor = NEW_TOOL_FLAVORS[(n + j) % NEW_TOOL_FLAVORS.length];
+      return {
+        id: `t-${n}-${j}`,
+        label: `${flavor.toUpperCase()}-${j}`,
+        flavor,
+        status: j === 0 ? status : "idle",
+      };
+    }),
+  };
+}
+
 export function ObservatoryProvider({ children }: { children: ReactNode }) {
-  const graph = useMemo(() => buildGraph(), []);
-  const [nodes] = useState<VisualNode[]>(graph.nodes);
-  const [edges] = useState<VisualEdge[]>(graph.edges);
+  const [config, setConfig] = useState<NetworkConfig>(DEFAULT_CONFIG);
+
+  // Topology is derived from config: a config change rebuilds the graph and
+  // the 3D scene reacts (new regions animate in).
+  const graph = useMemo(() => buildGraph(config), [config]);
+  const nodes = graph.nodes;
+  const edges = graph.edges;
+
+  const addAgent = useCallback(() => {
+    setConfig((prev) => ({ ...prev, agents: [...prev.agents, makeAgent()] }));
+  }, []);
   const [events, setEvents] = useState<NormalizedAgentEvent[]>(SEED_EVENTS);
   const [connectors] = useState<ConnectorStatus[]>(SEED_CONNECTORS);
   const [agents] = useState<AgentSummary[]>(SEED_AGENTS);
@@ -201,6 +238,7 @@ export function ObservatoryProvider({ children }: { children: ReactNode }) {
       setMode,
       paused,
       setPaused,
+      addAgent,
       onFire,
     }),
     [
@@ -214,6 +252,7 @@ export function ObservatoryProvider({ children }: { children: ReactNode }) {
       systemStatus,
       mode,
       paused,
+      addAgent,
       onFire,
     ],
   );

@@ -1,12 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { AgentNetwork } from "@/components/graph/AgentNetwork";
+import { AgentGalaxy } from "@/components/graph/AgentGalaxy";
+import { AgentOffice } from "@/components/graph/AgentOffice";
 import { useObservatory } from "@/state/observatory";
 import { statusColor, statusLabel, statusToneClass } from "@/lib/theme";
 import { clock, duration, timeAgo } from "@/lib/time";
 import { AGENTS } from "@/data/agents";
 import { CubeIcon, ExpandIcon, SlidersIcon } from "@/components/icons";
 
-const TABS = ["GRAPH", "RUNS", "TOOLS", "TRACE"] as const;
+const TABS = ["GRAPH", "ORBIT", "OFFICE", "RUNS", "TOOLS", "TRACE"] as const;
 type Tab = (typeof TABS)[number];
 
 export function NetworkPanel() {
@@ -44,6 +46,8 @@ export function NetworkPanel() {
       </div>
 
       {tab === "GRAPH" && <AgentNetwork />}
+      {tab === "ORBIT" && <AgentGalaxy />}
+      {tab === "OFFICE" && <AgentOffice />}
       {tab === "RUNS" && <RunsPane />}
       {tab === "TOOLS" && <ToolsPane />}
       {tab === "TRACE" && <TracePane />}
